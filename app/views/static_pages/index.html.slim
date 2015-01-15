@@ -2,3 +2,8 @@ h1 Youtube Links
 - @links.each do |link|
   div
     = link_to link.title, "https://www.youtube.com/watch?v=" + link.youtube_code
+
+/ - 100.times do |i|
+/   div
+/     - val = (i * 5) + 1
+/     = 'heroku run:detached rake "scrape:up_init[' + val.to_s + ']"'

@@ -104,7 +104,7 @@ namespace :scrape do
   def get_up_url(sfrequency)
     require 'open-uri'
     require 'nokogiri'
-    efrequency = sfrequency + 9
+    efrequency = sfrequency + 4
     @skipped_page = []
     for i in sfrequency..efrequency
       puts "page " + i.to_s
