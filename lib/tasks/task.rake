@@ -105,12 +105,12 @@ namespace :scrape do
     require 'open-uri'
     require 'nokogiri'
 
-    skipped_page = []
+    @skipped_page = []
     for i in 1..frequency
       puts "page " + i.to_s
 
       url = "http://www.upworthy.com/page/" + i.to_s
-      tries = 0
+      @tries = 0
       begin
         browser = open(url).read
         html_doc = Nokogiri::HTML(browser)
@@ -120,34 +120,17 @@ namespace :scrape do
         get_up_info(up_url)
       end
       rescue OpenURI::HTTPError => e
-        puts e
-        case e.io.status[0]
-        when "404"
-          tries += 1
-          if tries < 3
-            puts "Attempting to Retry..." + tries.to_s + "...In 5 Seconds"
-            sleep 5
-            retry
-          else
-            skipped_page.push(i)
-            puts "Skipped the following page" + skipped_page.to_s
-            abort("Error...Not Found...Website not found. Exit task")
-          end
-        else
-          tries += 1
-          if tries < 3
-            puts "Attempting to Retry..." + tries.to_s + "...In 5 Seconds"
-            sleep 5
-            retry
-          else
-            skipped_page.push(i)
-            puts "Error...Skipping"
-            next
-          end
+        case rescue_me(e, i)
+        when 1
+          retry
+        when 2
+          next
+        when 3
+          exit
         end
       end
     end
-    puts "Skipped the following page " + skipped_page.to_s
+    puts "Skipped the following page " + @skipped_page.to_s
   end
 
   def get_up_info(up_url)
@@ -168,10 +151,13 @@ namespace :scrape do
           title = html_doc2.css('title')[0].text
           create_up_video(title, youtube_code)
         rescue OpenURI::HTTPError => e
-          case e.io.status[0]
-          when "403"
-            puts "Error...Forbidden...Skipping Page"
-            return 
+          case rescue_me(e, nil)
+          when 1
+            retry
+          when 2
+            return
+          when 3
+            exit
           end
         end
       end
@@ -180,6 +166,39 @@ namespace :scrape do
 
   def create_up_video(title, youtube_code)
     YoutubeUrl.create(title: title, youtube_code: youtube_code)
+  end
+
+  def rescue_me(e, i)
+    case e.io.status[0]
+    when "403"
+      puts "Error...Forbidden...Skipping Page"
+      return 2
+    when "404"
+      case attempt_retry(i, "Error...Not Found...Website not found. Exit task")
+      when 1
+        return 1
+      when 2 #force exit task
+        return 3
+      end
+    else #500
+      return attempt_retry(i, "Skipped")
+    end
+  end
+
+  def attempt_retry(i, message)
+    @tries += 1
+    if @tries < 3
+      puts "Attempting to Retry..." + @tries.to_s + "...In 5 Seconds"
+      sleep 5
+      return 1
+    else
+      if not i == nil
+        @skipped_page.push(i)
+      end
+      puts "Skipped the following page" + @skipped_page.to_s
+      puts message
+      return 2
+    end
   end
 end
 
