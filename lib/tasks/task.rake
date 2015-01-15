@@ -93,20 +93,20 @@ namespace :scrape do
   end
 #--------------------------------------------------------------------------------------------------------------
   #4190
-  task :up_init => :environment do
-    get_up_url(500)
+  task :up_init, [:frequency]  => :environment do |task, args|
+    get_up_url(args.frequency.to_i)
   end
 
   task :up_update => :environment do
     get_up_url(1)
   end
 
-  def get_up_url(frequency)
+  def get_up_url(sfrequency)
     require 'open-uri'
     require 'nokogiri'
-
+    efrequency = sfrequency + 9
     @skipped_page = []
-    for i in 10..frequency
+    for i in sfrequency..efrequency
       puts "page " + i.to_s
 
       url = "http://www.upworthy.com/page/" + i.to_s
@@ -169,7 +169,6 @@ namespace :scrape do
   end
 
   def rescue_me(e, i)
-    puts e
     case e.io.status[0]
     when "403"
       puts "Error...Forbidden...Skipping Page"
