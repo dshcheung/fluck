@@ -125,8 +125,6 @@ namespace :scrape do
           retry
         when 2
           next
-        when 3
-          exit
         end
       end
     end
@@ -156,8 +154,6 @@ namespace :scrape do
             retry
           when 2
             return
-          when 3
-            exit
           end
         end
       end
@@ -171,15 +167,16 @@ namespace :scrape do
   def rescue_me(e, i)
     case e.io.status[0]
     when "403"
-      puts "Error...Forbidden...Skipping Page"
+      puts "Error...Forbidden...Skipped"
       return 2
     when "404"
-      case attempt_retry(i, "Error...Not Found...Website not found. Exit task")
-      when 1
-        return 1
-      when 2 #force exit task
-        return 3
-      end
+      return attempt_retry(i, "Error...Website not found...Skipped")
+      # case attempt_retry(i, "Error...Not Found...Website not found. Exit task")
+      # when 1
+      #   return 1
+      # when 2 #force exit task
+      #   return 3
+      # end
     else #500
       return attempt_retry(i, "Skipped")
     end
