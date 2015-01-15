@@ -106,7 +106,7 @@ namespace :scrape do
     require 'nokogiri'
 
     @skipped_page = []
-    for i in 1..frequency
+    for i in 10..frequency
       puts "page " + i.to_s
 
       url = "http://www.upworthy.com/page/" + i.to_s
@@ -169,6 +169,7 @@ namespace :scrape do
   end
 
   def rescue_me(e, i)
+    puts e
     case e.io.status[0]
     when "403"
       puts "Error...Forbidden...Skipping Page"
