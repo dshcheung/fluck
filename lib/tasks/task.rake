@@ -181,12 +181,6 @@ namespace :scrape do
   def create_up_video(title, youtube_code)
     YoutubeUrl.create(title: title, youtube_code: youtube_code)
   end
-
-  task :test => :environment do
-    50.times do
-      Test.create
-    end
-  end
 end
 
 
