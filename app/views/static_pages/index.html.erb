@@ -1,0 +1,6 @@
+<h1>Youtube Links</h1>
+<% @links.each do |link| %>
+  <div>
+    <%= link_to link.title, "https://www.youtube.com/watch?v=" + link.youtube_code %>
+  </div>
+<% end %>
